@@ -1,0 +1,60 @@
+{
+    "Title" : "Some Sample Roadmap",
+    "TitleBGColor" : "#0000FF",
+    "TitleTextColor" : "#000000",
+    "Years" : "3",
+    "Measure" : "Q",
+    "Milestones" : [{
+        "Emerging" : [{
+            "Color" : "#0000FF",
+            "Letter" : "E"
+        }],
+        "Standard" : [{
+            "Color" : "#00FF00",
+            "Letter" : "S"
+        }],
+        "Containment" : [{
+            "Color" : "#FFFF00",
+            "Letter" : "C"
+        }],
+        "Retirement" : [{
+            "Color" : "#FF3399",
+            "Letter": "R"
+        }],
+        "Retired" : [{
+            "Color" : "#FF0000",
+            "Letter": "X"
+        }]
+
+    }],
+    "Track1" : [{
+        "TrackName" : "Version 1",
+        "EndYear" : "2022",
+        "EndQuarter" : "Q2",
+        "Milestones" : [{
+            "Standard" : [{
+                "Year": "2020",
+                "Quarter": "Q1"
+            }],
+            "Containment" : [{
+                "Year" : "2021",
+                "Quarter" : "Q3"
+            }],
+            "Retirement" : [{
+                "Year" : "2021",
+                "Quarter" : "Q4"
+            }],
+            "Retired" : [{
+                "Year" : "2022",
+                "Quarter": "Q2"
+            }]
+        }]
+    }],
+    "Track2" : [{
+        "TrackName" : "Version 2",
+        "BeginYear" : "2022",
+        "BeginQuarter" : "Q1",
+        "EndYear" : "2023",
+        "EndQuarter" : "Q4"
+    }]
+}
