@@ -34,7 +34,7 @@ class Roadmap:
         self.name = name
         self.num_years = int(num_years)
         self.roadmap_start_year = int(roadmap_start_year)
-        self.measure = measure
+        self.measure = measure.upper()
         self.roadmap_end_year = int(roadmap_start_year) + (int(num_years) - 1)
         
         #Set the defaults
@@ -144,7 +144,7 @@ class Roadmap:
         #Rebuild the title box
         self.__build_title_box()
 
-    def add_footer_text(self,footer_text:str):
+    def set_footer_text(self,footer_text:str):
         """Define what should be in the footer"""
         self.footer_text = footer_text
 
@@ -163,7 +163,7 @@ class Roadmap:
         self.milestones[milestone_name]["bgcolor"] = milestone_bgcolor
         self.milestones[milestone_name]["letter"] = milestone_letter[0]
 
-    def add_track(self, track_name: str, start_year: int, start_division: str, end_year: int, end_division: str):
+    def add_track(self, track_name:str, start_year:int, start_division:str, end_year:int, end_division:str, track_fontcolor:str="#000000", track_bgcolor:str="#FFFFFF"):
         """Add a track to the roadmap"""
         # Check the options
         try:
@@ -177,28 +177,48 @@ class Roadmap:
                 raise ValueError(
                     "Must provide an endyear between 1960 and 3000")
 
-            if self.measure.upper() == "H":
-                measure_test = re.compile('[H][12]')
-            elif self.measure.upper() == "Q":
-                measure_test = re.compile('[Q][1234]')
+            measure_test = re.compile('[QH][1234]')
 
             if not measure_test.match(start_division):
                 raise ValueError(
-                    "Must provide a start_division in matching [QH][1234] and also match the roadmap-set measure of Q or H")
+                    "Must provide a start_division in matching [QH][1234]")
 
             if not measure_test.match(end_division):
                 raise ValueError(
-                    "Must provide a end_division in matching [QH][1234] and also match the roadmap-set measure of Q or H")
+                    "Must provide a end_division in matching [QH][1234]")
         except:
             print("Error parsing arguments sent to add_track")
             raise
 
+        try:
+            colormatch = re.compile("^#(?:[0-9a-fA-F]{3}){1,2}$")
+            if not colormatch.match(track_bgcolor):
+                raise ValueError ("Invalid track_bgcolor provided")
+        except:
+            print("Please set track_bgcolor colors!")
+            raise
+
+        try:
+            colormatch = re.compile("^#(?:[0-9a-fA-F]{3}){1,2}$")
+            if not colormatch.match(track_fontcolor):
+                raise ValueError ("Invalid track_fontcolor provided")
+        except:
+            print("Please set track_fontcolor colors!")
+            raise
+
+        #Check if the measure of the roadmap = the measure of the track requested
+        #If not, adjust accordingly.  Round up when quarters to halves
+        adjusted_start_division = self.__round_division(start_division)
+        adjusted_end_division = self.__round_division(end_division)
+
         #Load the track into the dict
         self.tracks[track_name] = {}
         self.tracks[track_name]["start_year"] = start_year
-        self.tracks[track_name]["start_division"] = start_division
+        self.tracks[track_name]["start_division"] = adjusted_start_division
         self.tracks[track_name]["end_year"] = end_year
-        self.tracks[track_name]["end_division"] = end_division
+        self.tracks[track_name]["end_division"] = adjusted_end_division
+        self.tracks[track_name]["track_bgcolor"] = track_bgcolor
+        self.tracks[track_name]["track_fontcolor"] = track_fontcolor
 
     def add_track_milestone(self, track_name:str, milestone_name:str, milestone_year:int, milestone_division:str):
         """Add a milestone to a track by the track's name"""
@@ -206,18 +226,30 @@ class Roadmap:
         if "milestones" not in self.tracks[track_name]:
             self.tracks[track_name]["milestones"] = {}
 
-        #Validate the provided milestone
-        if not (milestone_year > 1960 and milestone_year < 3000):
-            raise ValueError(
-                "Must provide a startyear between 1960 and 3000")
-        if not (milestone_year >= self.tracks[track_name]["start_year"] and milestone_year <= self.tracks[track_name]["end_year"]):
-            raise ValueError(
-                "Milestone year must be in the year range of the track")
+        try:
+            #Validate the provided milestone
+            if not (milestone_year > 1960 and milestone_year < 3000):
+                raise ValueError(
+                    "Must provide a startyear between 1960 and 3000")
+            if not (milestone_year >= self.tracks[track_name]["start_year"] and milestone_year <= self.tracks[track_name]["end_year"]):
+                raise ValueError(
+                    "Milestone year must be in the year range of the track")
+            
+            division_test = re.compile('[QH][1234]')
+            if not division_test.match(milestone_division):
+                raise ValueError(
+                    "Must provide a start_division in matching [QH][1234]")
+
+        except:
+            print("Error validating milestone options")
+            raise()
+
+        adjusted_milestone = self.__round_division(milestone_division)
 
         #Store the milestone
         self.tracks[track_name]["milestones"][milestone_name] = {}
         self.tracks[track_name]["milestones"][milestone_name]["milestone_year"] = milestone_year
-        self.tracks[track_name]["milestones"][milestone_name]["milestone_division"] = milestone_division
+        self.tracks[track_name]["milestones"][milestone_name]["milestone_division"] = adjusted_milestone
 
     def get_footer_text(self):
         """Return whatever is currently defined to be in the footer"""
@@ -282,7 +314,6 @@ class Roadmap:
             #If the ending year for the track is past the ending year of the requested plan...
             if self.tracks[onetrack]["end_year"] > self.roadmap_end_year:
                 self.tracks[onetrack]["end_x"] = 1200
-
             else:
                 ending_year_column = (self.tracks[onetrack]["end_year"] - self.roadmap_start_year ) + 1
                 end_yeartext = "Y" + str(ending_year_column) #ex: Y2
@@ -297,6 +328,9 @@ class Roadmap:
             my_y = self.first_track_y + (track_number * self.spacing_track_y)
             self.tracks[onetrack]["y"] = my_y
 
+            track_bgcolor = self.tracks[onetrack]["track_bgcolor"]
+            track_fontcolor = self.tracks[onetrack]["track_fontcolor"]
+
             #Create the lines
             #If the end is on the page, make it a rectangle
             if self.tracks[onetrack]["end_x"] < 1200:
@@ -305,15 +339,13 @@ class Roadmap:
                 tail_top_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"] - height) #Point 1
                 tail_top_right = str(self.tracks[onetrack]["end_x"]) + " " + str(self.tracks[onetrack]["y"] - height) # Point 2
                 tail_bottom_right = str(self.tracks[onetrack]["end_x"]) + " " + str(self.tracks[onetrack]["y"])
-
                 #Add the rectangle
-                svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + tail_bottom_right + " Z\" fill=\"#ff5500\" stroke=\"#000000\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+                svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + tail_bottom_right + " Z\" fill=\"" + track_bgcolor + "\" stroke=\"" + track_fontcolor + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
 
                 #Add the label
                 label_y = str(self.tracks[onetrack]["y"] - 13)
                 label_x = str((self.tracks[onetrack]["start_x"] + self.tracks[onetrack]["end_x"]) / 2) #Center of the width of the tail/box
-                svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
-
+                svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
 
             #If the end is off page, make it an arrow.
             else:
@@ -328,12 +360,12 @@ class Roadmap:
                 arrow_left_down = "1158 " + str(self.tracks[onetrack]["y"])
                 
                 #Add the arrow
-                svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + arrow_left_up + " L " + arrow_right_out + " L " + arrow_right_in + " L " + arrow_left_down + " Z\" fill=\"#0055ff\" stroke=\"#000000\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+                svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + arrow_left_up + " L " + arrow_right_out + " L " + arrow_right_in + " L " + arrow_left_down + " Z\" fill=\""+ track_bgcolor + "\" stroke=\"" + track_fontcolor + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
 
                 #Add the text
                 label_y = str(self.tracks[onetrack]["y"] - 13)
                 label_x = str((self.tracks[onetrack]["start_x"] + 1158) / 2) #Center of the width of the tail/box
-                svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+                svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
 
             #Add the milestones
             if "milestones" in self.tracks[onetrack]:
@@ -342,7 +374,6 @@ class Roadmap:
                     milestone_division = self.tracks[onetrack]["milestones"][onemilestone]["milestone_division"]
                     #If the milestone is supposed to be on the roadmap timeframe
                     if (milestone_year >= self.roadmap_start_year and milestone_year <= self.roadmap_end_year):
-                        print("Drawing milestone " + onemilestone)
                         #Build the year column by text
                         milestone_year_column = (milestone_year - self.roadmap_start_year ) + 1
                         milestone_yeartext = "Y" + str(milestone_year_column) #ex: Y2
@@ -410,7 +441,7 @@ class Roadmap:
         #Build the division boxes
         svg_division_boxes = "<g id=\"yearDivisionBoxes\">"
         if self.num_years == 1:
-            if self.measure.upper() == "H":
+            if self.measure == "H":
                 svg_division_boxes = svg_division_boxes + "<rect x=\"0\" y=\"104\" width=\"595\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
                 svg_division_boxes = svg_division_boxes + "<text x=\"298\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">H1</text>"    
                 svg_division_boxes = svg_division_boxes + "<rect x=\"605\" y=\"104\" width=\"595\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
@@ -425,7 +456,7 @@ class Roadmap:
                 svg_division_boxes = svg_division_boxes + "<rect x=\"905\" y=\"104\" width=\"295\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
                 svg_division_boxes = svg_division_boxes + "<text x=\"1053\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">Q4</text>"
         elif self.num_years == 2:
-            if self.measure.upper() == "H":
+            if self.measure == "H":
                 svg_division_boxes = svg_division_boxes + "<rect x=\"0\" y=\"104\" width=\"295\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
                 svg_division_boxes = svg_division_boxes + "<text x=\"148\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">H1</text>"
                 svg_division_boxes = svg_division_boxes + "<rect x=\"300\" y=\"104\" width=\"295\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
@@ -452,7 +483,7 @@ class Roadmap:
                 svg_division_boxes = svg_division_boxes + "<rect x=\"1055\" y=\"104\" width=\"145\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
                 svg_division_boxes = svg_division_boxes + "<text x=\"1128\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">Q4</text>"
         elif self.num_years == 3:
-            if self.measure.upper() == "H":
+            if self.measure == "H":
                 svg_division_boxes = svg_division_boxes + "<rect x=\"0\" y=\"104\" width=\"190\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
                 svg_division_boxes = svg_division_boxes + "<text x=\"95\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">H1</text>"
                 svg_division_boxes = svg_division_boxes + "<rect x=\"200\" y=\"104\" width=\"190\" height=\"30\" rx=\"4.5\" ry=\"4.5\" fill=\"#ffffff\" stroke=\"#000000\" pointer-events=\"all\" />"
@@ -492,6 +523,25 @@ class Roadmap:
                 svg_division_boxes = svg_division_boxes + "<text x=\"1153\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">Q4</text>"
         svg_division_boxes = svg_division_boxes + "</g>"
         return svg_division_boxes
+
+    def __round_division(self,division):
+        """Round the requested division as needed.  Pass directly through if it's fine"""
+        if self.measure != division[0].upper():
+            if self.measure == "H" and division[0].upper() == "Q":
+                #If first half of year, set to H1.  Otherwise H2
+                if int(division[1]) < 3:
+                    division_out = "H1"
+                else:
+                    division_out = "H2"
+            elif self.measure == "Q" and division[0].upper() == "H":
+                #if first half of the year, set to Q2.  Otherwise Q4
+                if int(division[1]) == 1:
+                    division_out = "Q2"
+                else:
+                    division_out = "Q4"
+        else:
+            division_out = division.upper()
+        return division_out
 
     def build_image(self):
         """Compile all of the pieces into one svg string"""
