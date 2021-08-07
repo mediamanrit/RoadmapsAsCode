@@ -19,6 +19,7 @@ r.add_track_milestone("Test Track 1","Retired",2021,"Q2")
 
 #Line that starts and goes out
 r.add_track("Test Track 2",2021,"Q1",2029,"Q4")
+r.add_track_milestone("Test Track 2","Emerging",2021,"Q1")
 
 #Line that starts and ends
 r.add_track("Test Track 3",2020,"Q1",2022,"Q2")
@@ -31,13 +32,14 @@ r.add_track_milestone("Test Track 3","Retired",2022,"Q2")
 r.add_track("Test Track 4",2010,"Q2",2029,"Q3")
 
 #Add a footer
-r.add_footer_text("Some footer text would go here")
+r.set_footer_text("Some footer text would go here")
 
 out = r.build_image()
 
 destname = "test-3QY.svg"
 if os.path.exists(destname):
     os.remove(destname)
+
 f = open(destname,"x")
 f.write(out)
 f.close()

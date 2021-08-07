@@ -17,6 +17,7 @@ Key features of the tool:
 
 ---
 ## Usage
+To use the class, see the Readme file in the roadmap folder.
 
 ---
 ## Example
