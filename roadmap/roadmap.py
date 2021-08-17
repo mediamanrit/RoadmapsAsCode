@@ -467,60 +467,34 @@ class Roadmap:
             if self.trackopt_gradient and "milestones" in self.tracks[onetrack]:
                 #If the end is on the page, make it a rectangle w/ a milestone at the end as defined
                 if self.tracks[onetrack]["end_x"] < 1200:
-                    #If the track starts at the left edge,
-                    if self.tracks[onetrack]["start_x"] == 0:
-                        #Loop through the milestones in ordered manor
-                        currentkey = 0
-                        prevkey = None
-                        first_box = True
-                        #Loop through the milestones, sorted by column number.
-                        for ordered_mkey in sorted(milestone_order.keys()):
-                            currentkey = ordered_mkey
-                            #If this is the first one, start X at 0
-                            if prevkey == None:
-                                prevkey = currentkey
-                                continue
-                            #Otherwise, start at the column position
-                            else:
-                                if first_box:
-                                    this_start_x = 0
-                                    first_box = False
-                                else:
-                                    this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
-                                    this_start_x = self.my_column_endpoints[this_start_column]
-                                
-                                this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
-                                this_end_x = self.my_column_endpoints[this_end_column]
-
-                                sanitized_track_name = onetrack.replace(" ","_")
-                                target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
-                                box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
-                                svg_tracks = svg_tracks + box
-                    #The track starts in the middle of the page
-                    else:
-                        #Loop through the milestones in ordered manor
-                        currentkey = 0
-                        prevkey = None
-                        #Loop through the milestones, sorted by column number.
-                        for ordered_mkey in sorted(milestone_order.keys()):
-                            currentkey = ordered_mkey
-                            #If this is the first one, start X at 0
-                            if prevkey == None:
-                                prevkey = currentkey
-                                continue
-                            #Otherwise, start at the column position
+                    currentkey = 0
+                    prevkey = None
+                    first_box = True
+                    #Loop through the milestones, sorted by column number.
+                    for ordered_mkey in sorted(milestone_order.keys()):
+                        currentkey = ordered_mkey
+                        #If this is the first one, start X at 0
+                        if prevkey == None:
+                            prevkey = currentkey
+                            continue
+                        #Otherwise, start at the column position
+                        else:
+                            #If this is the first box, and if the track starts at 0, force a start of 0
+                            if first_box and self.tracks[onetrack]["start_x"] == 0:
+                                this_start_x = 0
+                                first_box = False
                             else:
                                 this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
                                 this_start_x = self.my_column_endpoints[this_start_column]
-                                
-                                this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
-                                this_end_x = self.my_column_endpoints[this_end_column]
+                            
+                            this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
+                            this_end_x = self.my_column_endpoints[this_end_column]
 
-                                sanitized_track_name = onetrack.replace(" ","_")
-                                target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
-                                box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
-                                svg_tracks = svg_tracks + box
-                        pass
+                            sanitized_track_name = onetrack.replace(" ","_")
+                            target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
+                            box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                            svg_tracks = svg_tracks + box
+
                 #If the end is off page, make it an arrow
                 else:
                     pass
