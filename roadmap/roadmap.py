@@ -36,7 +36,11 @@ class Roadmap:
         self.roadmap_start_year = int(roadmap_start_year)
         self.measure = measure.upper()
         self.roadmap_end_year = int(roadmap_start_year) + (int(num_years) - 1)
-        
+        if self.measure == "H":
+            self.columns = 2 * self.num_years
+        else:
+            self.columns = 4 * self.num_years
+
         #Set the defaults
         self.title_bg_color = "#FFFFFF"
         self.title_text_color = "#000000"
@@ -46,6 +50,9 @@ class Roadmap:
         self.spacing_track_y = 85
         self.footer_text = ""
         self.footer_text_color = "#000000"
+
+        self.trackopt_gradient = False
+        self.trackopt_height = 40
 
         #Define the arror end positions
         self.endpoints = {}
@@ -123,6 +130,78 @@ class Roadmap:
         self.endpoints["5Y"]["Y5"] = {}
         self.endpoints["5Y"]["Y5"]["H1"] = 0
         self.endpoints["5Y"]["Y5"]["H2"] = 0
+
+        #create the dict for the column-based endpoints
+        self.column_endpoints = {}
+        self.column_endpoints["1YQ"] = {}
+        self.column_endpoints["1YQ"][1] = 150
+        self.column_endpoints["1YQ"][2] = 450
+        self.column_endpoints["1YQ"][3] = 760
+        self.column_endpoints["1YQ"][4] = 1060
+        self.column_endpoints["1YH"] = {}
+        self.column_endpoints["1YH"][1] = 300
+        self.column_endpoints["1YH"][2] = 900
+        
+        self.column_endpoints["2YQ"] = {}
+        self.column_endpoints["2YQ"][1] = 73
+        self.column_endpoints["2YQ"][2] = 223
+        self.column_endpoints["2YQ"][3] = 373
+        self.column_endpoints["2YQ"][4] = 523
+        self.column_endpoints["2YQ"][5] = 678
+        self.column_endpoints["2YQ"][6] = 828
+        self.column_endpoints["2YQ"][7] = 978
+        self.column_endpoints["2YQ"][8] = 1128
+        self.column_endpoints["2YH"] = {}
+        self.column_endpoints["2YH"][1] = 148
+        self.column_endpoints["2YH"][2] = 448
+        self.column_endpoints["2YH"][3] = 753
+        self.column_endpoints["2YH"][4] = 1053
+
+        self.column_endpoints["3YQ"] = {}
+        self.column_endpoints["3YQ"][1] = 48
+        self.column_endpoints["3YQ"][2] = 146
+        self.column_endpoints["3YQ"][3] = 245
+        self.column_endpoints["3YQ"][4] = 343
+        self.column_endpoints["3YQ"][5] = 453
+        self.column_endpoints["3YQ"][6] = 551
+        self.column_endpoints["3YQ"][7] = 650
+        self.column_endpoints["3YQ"][8] = 748
+        self.column_endpoints["3YQ"][9] = 858
+        self.column_endpoints["3YQ"][10] = 956
+        self.column_endpoints["3YQ"][11] = 1055
+        self.column_endpoints["3YQ"][12] = 1153
+        self.column_endpoints["3YH"] = {}
+        self.column_endpoints["3YH"][1] = 95
+        self.column_endpoints["3YH"][2] = 295
+        self.column_endpoints["3YH"][3] = 500
+        self.column_endpoints["3YH"][4] = 700
+        self.column_endpoints["3YH"][5] = 905
+        self.column_endpoints["3YH"][6] = 1105
+
+        self.column_endpoints["4YH"] = {}
+        self.column_endpoints["4YH"][1] = 0
+        self.column_endpoints["4YH"][2] = 0
+        self.column_endpoints["4YH"][3] = 0
+        self.column_endpoints["4YH"][4] = 0
+        self.column_endpoints["4YH"][5] = 0
+        self.column_endpoints["4YH"][6] = 0
+        self.column_endpoints["4YH"][7] = 0
+        self.column_endpoints["4YH"][8] = 0
+
+        self.column_endpoints["5YH"] = {}
+        self.column_endpoints["5YH"][1] = 0
+        self.column_endpoints["5YH"][2] = 0
+        self.column_endpoints["5YH"][3] = 0
+        self.column_endpoints["5YH"][4] = 0
+        self.column_endpoints["5YH"][5] = 0
+        self.column_endpoints["5YH"][6] = 0
+        self.column_endpoints["5YH"][7] = 0
+        self.column_endpoints["5YH"][8] = 0
+        self.column_endpoints["5YH"][9] = 0
+        self.column_endpoints["5YH"][10] = 0
+
+        my_marker = str(self.num_years) + "Y" + self.measure
+        self.my_column_endpoints = self.column_endpoints[my_marker]
         
     def set_title_options(self, bg_color: str, text_color: str):
         """Sets the formatting options for the title of the roadmap"""
@@ -143,6 +222,14 @@ class Roadmap:
 
         #Rebuild the title box
         self.__build_title_box()
+    
+    def set_track_options(self, gradient_fill:bool=None):
+        """Set options for all tracks"""
+        try:
+            if gradient_fill is not None:
+                self.trackopt_gradient = gradient_fill
+        except:
+            raise
 
     def set_footer_text(self,footer_text:str):
         """Define what should be in the footer"""
@@ -251,6 +338,18 @@ class Roadmap:
         self.tracks[track_name]["milestones"][milestone_name]["milestone_year"] = milestone_year
         self.tracks[track_name]["milestones"][milestone_name]["milestone_division"] = adjusted_milestone
 
+        #Calculate what columns the milestones should go in for this roadmap...
+        #If the milestone is supposed to be on the roadmap timeframe
+        if (milestone_year >= self.roadmap_start_year and milestone_year <= self.roadmap_end_year):
+            if self.measure == "H":
+                bigstep = 2 * (milestone_year - self.roadmap_start_year )
+            else:
+                bigstep = 4 * (milestone_year - self.roadmap_start_year )
+            
+            littlestep = int(adjusted_milestone[1])
+            self.tracks[track_name]["milestones"][milestone_name]["milestone_column"] = bigstep + littlestep
+            print("added milestone for column " + str(bigstep + littlestep))
+
     def get_footer_text(self):
         """Return whatever is currently defined to be in the footer"""
         return self.footer_text
@@ -295,6 +394,7 @@ class Roadmap:
 
     def __build_tracks(self):
         svg_tracks = "<g id=\"Tracks\">"
+        svg_gradients = "<defs>"
         track_number = 0 # Using counter starting at 0 to track which roadmap track this is.
         for onetrack in self.tracks:
             #Figure out starting X position
@@ -331,41 +431,128 @@ class Roadmap:
             track_bgcolor = self.tracks[onetrack]["track_bgcolor"]
             track_fontcolor = self.tracks[onetrack]["track_fontcolor"]
 
+            #First check to see if we are supposed to do gradients, AND if we have milestones
+            if self.trackopt_gradient and "milestones" in self.tracks[onetrack]:
+                #go through the milestones and build the color maps for the gradients.
+                    milestone_order={}
+                    for onemilestone in self.tracks[onetrack]["milestones"]:
+                        if not "milestone_column" in self.tracks[onetrack]["milestones"][onemilestone]:
+                            continue
+                        mcolumn = self.tracks[onetrack]["milestones"][onemilestone]["milestone_column"]
+                        #mbg = self.milestones[onemilestone]["bgcolor"]
+                        milestone_order[mcolumn] = onemilestone
+
+                        currentkey = 0
+                        prevkey = None
+                        #Loop through the milestones, sorted by column number.
+                        for ordered_mkey in sorted(milestone_order.keys()):
+                            currentkey = ordered_mkey
+                            if prevkey == None:
+                                prevkey = currentkey
+                                continue
+
+                            #Build the graident definition for the previous color to the current color
+                            sanitized_track_name = onetrack.replace(" ","_")
+                            svg_gradient_name = "gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey]
+                            svg_gradient_start = self.milestones[milestone_order[prevkey]]["bgcolor"]
+                            svg_gradient_end = self.milestones[milestone_order[currentkey]]["bgcolor"]
+                            svg_gradients = svg_gradients + "<linearGradient x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\" id=\"" + svg_gradient_name + "\">"
+                            svg_gradients = svg_gradients + "<stop offset=\"0%\" stop-color=\"" + svg_gradient_start + "\" />"
+                            svg_gradients = svg_gradients + "<stop offset=\"100%\" stop-color=\"" + svg_gradient_end + "\" />"
+                            svg_gradients = svg_gradients + "</linearGradient>"
+
             #Create the lines
-            #If the end is on the page, make it a rectangle
-            if self.tracks[onetrack]["end_x"] < 1200:
-                height = 40
-                tail_bottom_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"]) #Start, bottom left of box
-                tail_top_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"] - height) #Point 1
-                tail_top_right = str(self.tracks[onetrack]["end_x"]) + " " + str(self.tracks[onetrack]["y"] - height) # Point 2
-                tail_bottom_right = str(self.tracks[onetrack]["end_x"]) + " " + str(self.tracks[onetrack]["y"])
-                #Add the rectangle
-                svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + tail_bottom_right + " Z\" fill=\"" + track_bgcolor + "\" stroke=\"" + track_fontcolor + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+            #First check to see if we are supposed to do gradients, AND if we have milestones.  If so,
+            #draw boxes for the gradients.  If not, draw the big boxes
+            if self.trackopt_gradient and "milestones" in self.tracks[onetrack]:
+                #If the end is on the page, make it a rectangle w/ a milestone at the end as defined
+                if self.tracks[onetrack]["end_x"] < 1200:
+                    #If the track starts at the left edge,
+                    if self.tracks[onetrack]["start_x"] == 0:
+                        #Loop through the milestones in ordered manor
+                        currentkey = 0
+                        prevkey = None
+                        first_box = True
+                        #Loop through the milestones, sorted by column number.
+                        for ordered_mkey in sorted(milestone_order.keys()):
+                            currentkey = ordered_mkey
+                            #If this is the first one, start X at 0
+                            if prevkey == None:
+                                prevkey = currentkey
+                                continue
+                            #Otherwise, start at the column position
+                            else:
+                                if first_box:
+                                    this_start_x = 0
+                                    first_box = False
+                                else:
+                                    this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
+                                    this_start_x = self.my_column_endpoints[this_start_column]
+                                
+                                this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
+                                this_end_x = self.my_column_endpoints[this_end_column]
 
-                #Add the label
-                label_y = str(self.tracks[onetrack]["y"] - 13)
-                label_x = str((self.tracks[onetrack]["start_x"] + self.tracks[onetrack]["end_x"]) / 2) #Center of the width of the tail/box
-                svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+                                sanitized_track_name = onetrack.replace(" ","_")
+                                target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
+                                box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                                svg_tracks = svg_tracks + box
+                    #The track starts in the middle of the page
+                    else:
+                        #Loop through the milestones in ordered manor
+                        currentkey = 0
+                        prevkey = None
+                        #Loop through the milestones, sorted by column number.
+                        for ordered_mkey in sorted(milestone_order.keys()):
+                            currentkey = ordered_mkey
+                            #If this is the first one, start X at 0
+                            if prevkey == None:
+                                prevkey = currentkey
+                                continue
+                            #Otherwise, start at the column position
+                            else:
+                                this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
+                                this_start_x = self.my_column_endpoints[this_start_column]
+                                
+                                this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
+                                this_end_x = self.my_column_endpoints[this_end_column]
 
-            #If the end is off page, make it an arrow.
+                                sanitized_track_name = onetrack.replace(" ","_")
+                                target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
+                                box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                                svg_tracks = svg_tracks + box
+                        pass
+                #If the end is off page, make it an arrow
+                else:
+                    pass
             else:
-                height = 40
-                #define points for the arrow (7 total)
-                tail_bottom_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"]) #Start, bottom left of arrow path
-                tail_top_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"] - height) #Point 1
-                tail_top_right = "1158 " + str(self.tracks[onetrack]["y"] - height) # Point 2
-                arrow_left_up = "1158 "+ str(self.tracks[onetrack]["y"] - height - 20) # point 3
-                arrow_right_out = "1199.5 " + str(self.tracks[onetrack]["y"] - (height / 2))
-                arrow_right_in = "1158 " + str(self.tracks[onetrack]["y"] + 20)
-                arrow_left_down = "1158 " + str(self.tracks[onetrack]["y"])
-                
-                #Add the arrow
-                svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + arrow_left_up + " L " + arrow_right_out + " L " + arrow_right_in + " L " + arrow_left_down + " Z\" fill=\""+ track_bgcolor + "\" stroke=\"" + track_fontcolor + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+                #If the end is on the page, make it a rectangle
+                if self.tracks[onetrack]["end_x"] < 1200:
+                    box = self.__create_one_box(int(self.tracks[onetrack]["start_x"]),int(self.tracks[onetrack]["end_x"]),int(self.tracks[onetrack]["y"]),track_bgcolor,track_fontcolor)
+                    svg_tracks = svg_tracks + box
 
-                #Add the text
-                label_y = str(self.tracks[onetrack]["y"] - 13)
-                label_x = str((self.tracks[onetrack]["start_x"] + 1158) / 2) #Center of the width of the tail/box
-                svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+                    #Add the text
+                    label_y = str(self.tracks[onetrack]["y"] - 13)
+                    label_x = str((self.tracks[onetrack]["start_x"] + self.tracks[onetrack]["end_x"]) / 2) #Center of the width of the tail/box
+                    svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+
+                #If the end is off page, make it an arrow.
+                else:
+                    #define points for the arrow (7 total)
+                    tail_bottom_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"]) #Start, bottom left of arrow path
+                    tail_top_left = str(self.tracks[onetrack]["start_x"]) + " " + str(self.tracks[onetrack]["y"] - self.trackopt_height) #Point 1
+                    tail_top_right = "1158 " + str(self.tracks[onetrack]["y"] - self.trackopt_height) # Point 2
+                    arrow_left_up = "1158 "+ str(self.tracks[onetrack]["y"] - self.trackopt_height - 20) # point 3
+                    arrow_right_out = "1199.5 " + str(self.tracks[onetrack]["y"] - (self.trackopt_height / 2))
+                    arrow_right_in = "1158 " + str(self.tracks[onetrack]["y"] + 20)
+                    arrow_left_down = "1158 " + str(self.tracks[onetrack]["y"])
+                    
+                    #Add the arrow
+                    svg_tracks = svg_tracks + "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + arrow_left_up + " L " + arrow_right_out + " L " + arrow_right_in + " L " + arrow_left_down + " Z\" fill=\""+ track_bgcolor + "\" stroke=\"" + track_fontcolor + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+
+                    #Add the text
+                    label_y = str(self.tracks[onetrack]["y"] - 13)
+                    label_x = str((self.tracks[onetrack]["start_x"] + 1158) / 2) #Center of the width of the tail/box
+                    svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
 
             #Add the milestones
             if "milestones" in self.tracks[onetrack]:
@@ -402,7 +589,10 @@ class Roadmap:
             track_number = track_number + 1
         
         svg_tracks = svg_tracks + "</g>"
-        return svg_tracks
+        svg_gradients = svg_gradients + "</defs>"
+
+        retval = svg_gradients + svg_tracks
+        return retval
 
     def __build_opening(self):
         #Loop through the tracks to find the highest Y value
@@ -523,6 +713,49 @@ class Roadmap:
                 svg_division_boxes = svg_division_boxes + "<text x=\"1153\" y=\"124\" fill=\"#000000\" font-family=\"Helvetica\" font-size=\"16px\" text-anchor=\"middle\">Q4</text>"
         svg_division_boxes = svg_division_boxes + "</g>"
         return svg_division_boxes
+
+    def __convert_division_to_column(self,year_in:str,step_in:int):
+        """Take in a division format like Y1 2H and convert it to a column position"""
+        try:
+            if (year_in >= self.roadmap_start_year and year_in <= self.roadmap_end_year):
+                if self.measure == "H":
+                    bigstep = 2 * (year_in - self.roadmap_start_year )
+                else:
+                    bigstep = 4 * (year_in - self.roadmap_start_year )
+                
+                column = bigstep + step_in
+                return column
+            else:
+                raise("Year not on the roadmap")
+        except:
+            raise
+
+    def __create_one_box(self,start_x:int,end_x:int,start_y:int,bg_color:str,line_color:str):
+        """Creates an SVG box"""
+        bottom_left = str(start_x) + " " + str(start_y) #Start, bottom left of box
+        top_left = str(start_x) + " " + str(start_y - self.trackopt_height) #Point 1
+        top_right = str(end_x) + " " + str(start_y - self.trackopt_height) # Point 2
+        bottom_right = str(end_x) + " " + str(start_y)
+        
+        box_svg = "<path d=\"M " + bottom_left + " L " + top_left + " L " + top_right + " L " + bottom_right + " Z\" fill=\"" + bg_color + "\" stroke=\"" + line_color + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+
+        return box_svg
+
+    def __create_one_arrow_box(self,start_x:int,start_y:int,bg_color:str,line_color:str):
+        """Creates an SVG arrow box"""
+        #define points for the arrow (7 total)
+        tail_bottom_left = str(start_x) + " " + str(start_y) #Start, bottom left of arrow path
+        tail_top_left = str(start_x) + " " + str(start_y - self.trackopt_height) #Point 1
+        tail_top_right = "1158 " + str(start_y - self.trackopt_height) # Point 2
+        arrow_left_up = "1158 "+ str(start_y - self.trackopt_height - 20) # point 3
+        arrow_right_out = "1199.5 " + str(start_y - (self.trackopt_height / 2))
+        arrow_right_in = "1158 " + str(start_y + 20)
+        arrow_left_down = "1158 " + str(start_y)
+        
+        #Add the arrow
+        box_svg = "<path d=\"M " + tail_bottom_left + " L " + tail_top_left + " L " + tail_top_right + " L " + arrow_left_up + " L " + arrow_right_out + " L " + arrow_right_in + " L " + arrow_left_down + " Z\" fill=\""+ bg_color + "\" stroke=\"" + line_color + "\" stroke-linejoin=\"round\" stroke-miterlimit=\"10\" pointer-events=\"all\" />"
+        
+        return box_svg
 
     def __round_division(self,division):
         """Round the requested division as needed.  Pass directly through if it's fine"""
