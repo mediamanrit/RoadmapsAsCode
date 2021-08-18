@@ -292,6 +292,13 @@ class Roadmap:
         except:
             print("Please set track_fontcolor colors!")
             raise
+        
+        #Validate this is not a duplicate
+        try:
+            if track_name in self.tracks:
+                raise ValueError ("Duplicate track name provided")
+        except:
+            raise
 
         #Check if the measure of the roadmap = the measure of the track requested
         #If not, adjust accordingly.  Round up when quarters to halves
