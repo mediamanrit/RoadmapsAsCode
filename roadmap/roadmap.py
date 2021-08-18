@@ -348,7 +348,6 @@ class Roadmap:
             
             littlestep = int(adjusted_milestone[1])
             self.tracks[track_name]["milestones"][milestone_name]["milestone_column"] = bigstep + littlestep
-            print("added milestone for column " + str(bigstep + littlestep))
 
     def get_footer_text(self):
         """Return whatever is currently defined to be in the footer"""
@@ -431,9 +430,23 @@ class Roadmap:
             track_bgcolor = self.tracks[onetrack]["track_bgcolor"]
             track_fontcolor = self.tracks[onetrack]["track_fontcolor"]
 
-            #First check to see if we are supposed to do gradients, AND if we have milestones
+            #First check to see if we are supposed to do gradients, AND if we have milestones.
+            #If so, create the gradient colors
             if self.trackopt_gradient and "milestones" in self.tracks[onetrack]:
-                #go through the milestones and build the color maps for the gradients.
+                #If there's only one, call it a fill
+                if len(self.tracks[onetrack]["milestones"]) == 1:
+                    milestone_order={}
+                    mcolumn = self.tracks[onetrack]["milestones"][list(self.tracks[onetrack]["milestones"].keys())[0]]["milestone_column"]
+                    milestone_order[mcolumn] = list(self.tracks[onetrack]["milestones"].keys())[0]
+
+                    sanitized_track_name = onetrack.replace(" ","_")
+                    svg_fill_name = "fill_" + sanitized_track_name + "_" + list(self.tracks[onetrack]["milestones"].keys())[0]
+                    svg_fill_color = self.milestones[list(self.tracks[onetrack]["milestones"].keys())[0]]["bgcolor"]
+                    svg_gradients = svg_gradients + "<linearGradient x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\" id=\"" + svg_fill_name + "\">"
+                    svg_gradients = svg_gradients + "<stop offset=\"0%\" stop-color=\"" + svg_fill_color + "\" />"
+                    svg_gradients = svg_gradients + "<stop offset=\"100%\" stop-color=\"" + svg_fill_color + "\" />"
+                    svg_gradients = svg_gradients + "</linearGradient>"
+                else:
                     milestone_order={}
                     for onemilestone in self.tracks[onetrack]["milestones"]:
                         if not "milestone_column" in self.tracks[onetrack]["milestones"][onemilestone]:
@@ -470,34 +483,141 @@ class Roadmap:
                     currentkey = 0
                     prevkey = None
                     first_box = True
-                    #Loop through the milestones, sorted by column number.
-                    for ordered_mkey in sorted(milestone_order.keys()):
-                        currentkey = ordered_mkey
-                        #If this is the first one, start X at 0
-                        if prevkey == None:
-                            prevkey = currentkey
-                            continue
-                        #Otherwise, start at the column position
+                    if len(milestone_order) == 1:
+                        mname = list(self.tracks[onetrack]["milestones"].keys())[0]
+
+                        if first_box and self.tracks[onetrack]["start_x"] == 0:
+                            this_start_x = 0
+                            first_box = False
                         else:
-                            #If this is the first box, and if the track starts at 0, force a start of 0
-                            if first_box and self.tracks[onetrack]["start_x"] == 0:
-                                this_start_x = 0
-                                first_box = False
-                            else:
-                                this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
-                                this_start_x = self.my_column_endpoints[this_start_column]
-                            
-                            this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
-                            this_end_x = self.my_column_endpoints[this_end_column]
+                            this_start_column = self.tracks[onetrack]["milestones"][mname]["milestone_column"]
+                            this_start_x = self.tracks[onetrack]["start_x"]
+                            this_end_x = self.tracks[onetrack]["end_x"]
 
                             sanitized_track_name = onetrack.replace(" ","_")
-                            target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
-                            box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                            target_fill_url = "url(#fill_" + sanitized_track_name + "_" + mname + ")"
+                            box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_fill_url,track_fontcolor)
                             svg_tracks = svg_tracks + box
+
+                            #Add the text
+                            label_y = str(self.tracks[onetrack]["y"] - 13)
+                            label_x = str((this_start_x + this_end_x) / 2) #Center of the width of the tail/box
+                            svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+
+                    else:
+                        #Loop through the milestones, sorted by column number
+                        for ordered_mkey in sorted(milestone_order.keys()):
+                            currentkey = ordered_mkey
+                            if prevkey == None:
+                                prevkey = currentkey
+                                continue
+                            #Otherwise, start at the column position
+                            else:
+                                #If this is the first box, and if the track starts at 0, force a start of 0
+                                if first_box and self.tracks[onetrack]["start_x"] == 0:
+                                    this_start_x = 0
+                                    first_box = False
+                                else:
+                                    this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
+                                    this_start_x = self.my_column_endpoints[this_start_column]
+                                
+                                this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
+                                this_end_x = self.my_column_endpoints[this_end_column]
+
+                                sanitized_track_name = onetrack.replace(" ","_")
+                                target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
+                                box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                                svg_tracks = svg_tracks + box
+
+                        #Add the text
+                        label_y = str(self.tracks[onetrack]["y"] - 13)
+                        label_x = str((this_start_x + this_end_x) / 2) #Center of the width of the tail/box
+                        svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
 
                 #If the end is off page, make it an arrow
                 else:
-                    pass
+                    currentkey = 0
+                    prevkey = None
+                    first_box = True
+                    milestone_total_count = len(milestone_order)
+                    current_milestone_count = 0
+                    
+                    #If there are no milestones on the screen...
+                    #We draw a basic arrow box
+                    if len(milestone_order) == 0:
+                        this_start_x = self.tracks[onetrack]["start_x"]
+
+                        sanitized_track_name = onetrack.replace(" ","_")
+                        target_fill_url = "url(#fill_" + sanitized_track_name + ")"
+                        box = self.__create_one_arrow_box(int(this_start_x),int(self.tracks[onetrack]["y"]),target_fill_url,track_fontcolor)
+                        svg_tracks = svg_tracks + box
+
+                        #Add the text
+                        label_y = str(self.tracks[onetrack]["y"] - 13)
+                        label_x = str((this_start_x + 1158) / 2) #Center of the width of the tail/box
+                        svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+
+                    #If there's only one milestone on the screen...
+                    elif len(milestone_order) == 1:
+                        mname = list(self.tracks[onetrack]["milestones"].keys())[0]
+
+                        if first_box and self.tracks[onetrack]["start_x"] == 0:
+                            this_start_x = 0
+                            first_box = False
+                        else:
+                            this_start_column = self.tracks[onetrack]["milestones"][mname]["milestone_column"]
+                            this_start_x = self.tracks[onetrack]["start_x"]
+
+                            sanitized_track_name = onetrack.replace(" ","_")
+                            target_fill_url = "url(#fill_" + sanitized_track_name + "_" + mname + ")"
+                            box = self.__create_one_arrow_box(int(this_start_x),int(self.tracks[onetrack]["y"]),target_fill_url,track_fontcolor)
+                            svg_tracks = svg_tracks + box
+
+                            #Add the text
+                            label_y = str(self.tracks[onetrack]["y"] - 13)
+                            label_x = str((this_start_x + 1158) / 2) #Center of the width of the tail/box
+                            svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
+
+                    else:
+                        #Loop through the milestones, sorted by column number.
+                        for ordered_mkey in sorted(milestone_order.keys()):
+                            currentkey = ordered_mkey
+                            current_milestone_count = current_milestone_count + 1
+                            #If there is no previous key, this is the first pass.  Set the prevkey and go to the next loop
+                            if prevkey == None:
+                                prevkey = currentkey
+                                continue
+                            #Otherwise, start at the column position
+                            else:
+                                #If this is the first box, and if the track starts at 0, force a start of 0
+                                if first_box and self.tracks[onetrack]["start_x"] == 0:
+                                    this_start_x = 0
+                                    first_box = False
+                                else:
+                                    this_start_column = self.tracks[onetrack]["milestones"][milestone_order[prevkey]]["milestone_column"]
+                                    this_start_x = self.my_column_endpoints[this_start_column]
+                                
+                                #If this is the last box, make it an arrow box
+                                #If not, regular box
+                                if current_milestone_count == milestone_total_count :
+                                    sanitized_track_name = onetrack.replace(" ","_")
+                                    target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
+                                    
+                                    arrow = self.__create_one_arrow_box(int(this_start_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                                    svg_tracks = svg_tracks + arrow
+                                else:
+                                    this_end_column = self.tracks[onetrack]["milestones"][milestone_order[currentkey]]["milestone_column"]
+                                    this_end_x = self.my_column_endpoints[this_end_column]
+
+                                    sanitized_track_name = onetrack.replace(" ","_")
+                                    target_gradient_url = "url(#gradient_" + sanitized_track_name + "_" + milestone_order[prevkey] + "_to_" + milestone_order[currentkey] + ")"
+                                    
+                                    box = self.__create_one_box(int(this_start_x),int(this_end_x),int(self.tracks[onetrack]["y"]),target_gradient_url,track_fontcolor)
+                                    svg_tracks = svg_tracks + box
+                        #Add the text
+                        label_y = str(self.tracks[onetrack]["y"] - 13)
+                        label_x = str((this_start_x + this_end_x) / 2) #Center of the width of the tail/box
+                        svg_tracks = svg_tracks + "<text x=\"" + label_x + "\" y=\"" + label_y + "\" fill=\"" + track_fontcolor + "\" font-family=\"Helvetica\" font-size=\"18px\" text-anchor=\"middle\">" + str(onetrack) + "</text>"
             else:
                 #If the end is on the page, make it a rectangle
                 if self.tracks[onetrack]["end_x"] < 1200:
