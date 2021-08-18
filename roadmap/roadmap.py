@@ -159,6 +159,13 @@ class Roadmap:
             print("Please set valid colors!")
             raise
 
+        #Validate it's not a duplicate
+        try:
+            if milestone_name in self.milestones:
+                raise ValueError ("Cannot add a duplicate milestone definition")
+        except:
+            raise
+
         self.milestones[milestone_name] = {}
         self.milestones[milestone_name]["bgcolor"] = milestone_bgcolor
         self.milestones[milestone_name]["letter"] = milestone_letter[0]
