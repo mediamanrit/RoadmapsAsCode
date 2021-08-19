@@ -12,8 +12,28 @@ Some of the words used in the documentation and code and what they mean:
 * **Milestone**: A point on a track that indicates a state change.  Typically milestone meanings on all tracks share a common set of state defintions.
 * **Technology Architect**: The person who made this tool due to a large lack of capability and understanding in my industry.
 ---
-## Usage
-Here are the methods to use the class
+
+## JSON2roadmap class
+This class takes in a python dictionary that is produced using the json module (reading) a json file, and uses the Roadmap class to generate a roadmap visualization.  In other words, it's a wrapper for the Roadmap class that leverages JSON formatted inputs to create a roadmap visualization.
+
+Here are the methods to use the class.
+
+**__init__**(*self*,*schema_version: int*,*json_dictionary: dict*)
+Class instance definition. Requires:
+ * schema_version (int): Version number of the schema.  Defaults to 1.
+ * json_dictionary (dict): Dictionary of the JSON read, provided in by the Python JSON library.
+
+**get_roadmap**(*self*):
+Creates a roadmap (via the Roadmap class), and returns a string object with the SVG code.
+
+**__load_json_dict**(*self*):
+Internal function, used for validating and loading the JSON dictionary passed to the class at instance creation time.
+
+
+## Roadmap class
+This class is what creates the roadmap visualization.
+
+Here are the methods to use the class.
 
 **__init__**(*self*, *name: str*, *num_years: int*, *roadmap_start_year:int*, *measure: str*)
 Class instance definition. Requires:
@@ -29,6 +49,10 @@ Creates and returns the svg image.
 Sets the options for the title bar. Requires:
  * bg_color (str): The background color for the title box in hex format.
  * text_color (str): The text color for the title box in hex format.
+
+**set_track_options**(*self*, *gradient_fill:bool=None*)
+Set the track options.  All options are optional:
+ * gradient_fill (bool): Set to True if the tracks should be filled with gradient colors between the milestones.
 
 **set_footer_text**(*self*,*footer_text:str*)
 Sets the text for the footer.  Requires:
@@ -58,6 +82,60 @@ Adds milestones to tracks on a roadmap.  Requires:
 * milestone_year (int): The year the milestone is in.
 * milestone_division (str): The division the milestone is in (ie, Q3, H1, etc).
 
+**get_footer_text**(*self*)
+Returns the string value of what the set footer text value is (set by **set_footer_text**).
+
+**get_track**(*self*, *name*)
+Returns the dictionary that stores the contents of the requested track (created by **add_track**).
+
+**del_track**(*self*, *name*)
+Delete the track called *name* (created by **add_track**).
+
+**__build_footer**(*self*)
+Internal function, to assemble the SVG code for the contents of the footer.
+
+**__build_title_box**(*self*)
+Internal function, to assemble the SVG code for the title box.
+
+**__build_tracks**(*self*)
+Internal function, to assemble the SVG code for the tracks.
+
+**__build_opening**(*self*)
+Internal function, to assemble the header of the SVG code.
+
+**__build_year_boxes**(*self*,*num_years*)
+Internal function, to assemble the year boxes in the SVG drawing.  Requires:
+ * num_years (int): The number of years to make boxes for
+
+**__build_division_boxes**(*self*)
+Internal function, to assemble the division boxes in the SVG drawing.
+
+**__convert_division_to_column**(*self*,*year_in:int*,*step_in:int*)
+Internal function, to convert a division format to what column number it is in.  Requires:
+ * year_in (inr): The year for the division 
+ * step_in (int): The step of the division (1-4 if the roadmap measure is on quarters, 1-2 if in halves)
+
+**__create_one_box**(*self*,*start_x:int*,*end_x:int*,*start_y:int*,*bg_color:str*,*line_color:str*)
+Internal function, to create SVG code for a box/rectangle.  Requires:
+ * start_x (int): The x position to start the box at.
+ * end_x (int): The x position to end the box at.
+ * start_y (int): The bottom left y corner of the box to start at.
+ * bg_color (str): Color for the background of the box.  Either HEX or cross reference in the SVG file.
+ * line_color (str): Color for the background of the box.  Either HEX or cross reference in the SVG file.
+
+**__create_one_arrow_box**(*self*,*start_x:int*,*start_y:int*,*bg_color:str*,*line_color:str*)
+ Internal function, to create SVG code for an arrow that points off the page.  Requires:
+ * start_x (int): The x position to start the box at.
+ * start_y (int): The bottom left y corner of the box to start at.
+ * bg_color (str): Color for the background of the box.  Either HEX or cross reference in the SVG file.
+ * line_color (str): Color for the background of the box.  Either HEX or cross reference in the SVG file.
+
+**__round_division**(*self*,*division:str*)
+ Internal function, to round a division string (ie H1 or Q3) to match the specific measure of a roadmap.
+ * division (str): Division string to read from.
+
+**build_image**(*self*):
+Create and assemble the SVG drawing.  Returns an SVG as a string.
 
 ---
 ## Example

@@ -581,7 +581,7 @@ class Roadmap:
                         else:
                             this_start_column = self.tracks[onetrack]["milestones"][mname]["milestone_column"]
                             this_start_x = self.tracks[onetrack]["start_x"]
-
+                            
                             sanitized_track_name = onetrack.replace(" ","_")
                             target_fill_url = "url(#fill_" + sanitized_track_name + "_" + mname + ")"
                             box = self.__create_one_arrow_box(int(this_start_x),int(self.tracks[onetrack]["y"]),target_fill_url,track_fontcolor)
@@ -822,7 +822,7 @@ class Roadmap:
         svg_division_boxes = svg_division_boxes + "</g>"
         return svg_division_boxes
 
-    def __convert_division_to_column(self,year_in:str,step_in:int):
+    def __convert_division_to_column(self,year_in:int,step_in:int):
         """Take in a division format like Y1 2H and convert it to a column position"""
         try:
             if (year_in >= self.roadmap_start_year and year_in <= self.roadmap_end_year):
@@ -865,7 +865,7 @@ class Roadmap:
         
         return box_svg
 
-    def __round_division(self,division):
+    def __round_division(self,division:str):
         """Round the requested division as needed.  Pass directly through if it's fine"""
         if self.measure != division[0].upper():
             if self.measure == "H" and division[0].upper() == "Q":
