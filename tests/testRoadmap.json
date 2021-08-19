@@ -1,60 +1,164 @@
 {
-    "Title" : "Some Sample Roadmap",
-    "TitleBGColor" : "#0000FF",
-    "TitleTextColor" : "#000000",
-    "Years" : "3",
-    "Measure" : "Q",
-    "Milestones" : [{
-        "Emerging" : [{
-            "Color" : "#0000FF",
-            "Letter" : "E"
-        }],
-        "Standard" : [{
-            "Color" : "#00FF00",
-            "Letter" : "S"
-        }],
-        "Containment" : [{
-            "Color" : "#FFFF00",
-            "Letter" : "C"
-        }],
-        "Retirement" : [{
-            "Color" : "#FF3399",
-            "Letter": "R"
-        }],
-        "Retired" : [{
-            "Color" : "#FF0000",
-            "Letter": "X"
-        }]
-
-    }],
-    "Track1" : [{
-        "TrackName" : "Version 1",
-        "EndYear" : "2022",
-        "EndQuarter" : "Q2",
-        "Milestones" : [{
-            "Standard" : [{
-                "Year": "2020",
-                "Quarter": "Q1"
-            }],
-            "Containment" : [{
-                "Year" : "2021",
-                "Quarter" : "Q3"
-            }],
-            "Retirement" : [{
-                "Year" : "2021",
-                "Quarter" : "Q4"
-            }],
-            "Retired" : [{
-                "Year" : "2022",
-                "Quarter": "Q2"
-            }]
-        }]
-    }],
-    "Track2" : [{
-        "TrackName" : "Version 2",
-        "BeginYear" : "2022",
-        "BeginQuarter" : "Q1",
-        "EndYear" : "2023",
-        "EndQuarter" : "Q4"
-    }]
+    "schemaVersion" : "1",
+    "title" : "Sample JSON Roadmap",
+    "titleBGColor" : "#0000FF",
+    "titleTextColor" : "#000000",
+    "gradientFill" : "true",
+    "footerText" : "Some footer text would go here",
+    "years" : "3",
+    "startYear" : "2020",
+    "measure" : "Q",
+    "milestones" : {
+        "Emerging" : {
+            "color" : "#0000FF",
+            "letter" : "E"
+        },
+        "Standard" : {
+            "color" : "#00FF00",
+            "letter" : "S"
+        },
+        "Containment" : {
+            "color" : "#FFFF00",
+            "letter" : "C"
+        },
+        "Retirement" : {
+            "color" : "#FF3399",
+            "letter": "R"
+        },
+        "Retired" : {
+            "color" : "#FF0000",
+            "letter": "X"
+        }
+    },
+    "tracks" : {
+        "JSON Test Track 1" : {
+            "trackName" : "JSON Test Track 1",
+            "beginYear" : "2010",
+            "beginDivision" : "Q2",
+            "endYear" : "2021",
+            "endDivision" : "Q2",
+            "milestones" : {
+                "Standard" : {
+                    "year": "2011",
+                    "division": "Q1"
+                },
+                "Containment" : {
+                    "year" : "2018",
+                    "division" : "Q1"
+                },
+                "Retirement" : {
+                    "year" : "2020",
+                    "division" : "Q1"
+                },
+                "Retired" : {
+                    "year" : "2021",
+                    "division": "Q2"
+                }
+            }
+        },
+        "JSON Test Track 2" : {
+            "trackName" : "JSON Test Track 2",
+            "beginYear" : "2021",
+            "beginDivision" : "Q1",
+            "endYear" : "2029",
+            "endDivision" : "Q4",
+            "milestones" : {
+                "Emerging" : {
+                    "year": "2021",
+                    "division": "Q1"
+                }
+            }
+        },
+        "JSON Test Track 3" : {
+            "trackName" : "JSON Test Track 3",
+            "beginYear" : "2020",
+            "beginDivision" : "Q1",
+            "endYear" : "2022",
+            "endDivision" : "Q2",
+            "milestones" : {
+                "Standard" : {
+                    "year": "2020",
+                    "division": "Q1"
+                },
+                "Containment" : {
+                    "year" : "2021",
+                    "division" : "Q3"
+                },
+                "Retirement" : {
+                    "year" : "2022",
+                    "division" : "Q2"
+                },
+                "Retired" : {
+                    "year" : "2022",
+                    "division": "Q3"
+                }
+            }
+        },
+        "JSON Test Track 4" : {
+            "trackName" : "JSON Test Track 4",
+            "beginYear" : "2010",
+            "beginDivision" : "Q2",
+            "endYear" : "2029",
+            "endDivision" : "Q3",
+            "milestones" : {
+                "Standard" : {
+                    "year": "2010",
+                    "division": "Q2"
+                },
+                "Containment" : {
+                    "year" : "2029",
+                    "division" : "Q3"
+                }
+            }
+        },
+        "JSON Test Track 5" : {
+            "trackName" : "JSON Test Track 5",
+            "beginYear" : "2011",
+            "beginDivision" : "Q2",
+            "endYear" : "2029",
+            "endDivision" : "Q3",
+            "milestones" : {
+                "Emerging" : {
+                    "year": "2012",
+                    "division": "Q4"
+                },
+                "Standard" : {
+                    "year": "2019",
+                    "division": "Q1"
+                },
+                "Containment" : {
+                    "year" : "2020",
+                    "division" : "Q4"
+                },
+                "Retirement" : {
+                    "year" : "2022",
+                    "division" : "Q4"
+                },
+                "Retired" : {
+                    "year" : "2029",
+                    "division": "Q2"
+                }
+            }
+        },
+        "JSON Test Track 6" : {
+            "trackName" : "JSON Test Track 6",
+            "beginYear" : "2020",
+            "beginDivision" : "Q1",
+            "endYear" : "2022",
+            "endDivision" : "Q2",
+            "milestones" : {
+                "Emerging" : {
+                    "year": "2020",
+                    "division": "Q2"
+                }
+            }
+        },
+        "JSON Test Track 7" : {
+            "trackName" : "JSON Test Track 7",
+            "beginYear" : "2020",
+            "beginDivision" : "Q3",
+            "endYear" : "2022",
+            "endDivision" : "Q1"
+        }
+    }
 }

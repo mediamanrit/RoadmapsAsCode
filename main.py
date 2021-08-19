@@ -1,7 +1,8 @@
 import json
-import re
 import argparse
 import os.path
+from datetime import datetime
+from roadmap import JSON2roadmap
 
 parser = argparse.ArgumentParser(description="Build SVG roadmap image from JSON")
 parser.add_argument("-f","--file",required=True,help="Path to file to parse")
@@ -12,46 +13,27 @@ args = parser.parse_args()
 if os.path.exists(args.file):
     if args.debug:
         print("DEBUG: File " + args.file + " exists")
-    fileToOpen=args.file
+else:
+    print("ERROR: File " + args.file + " does not exist")
+    exit()
+    
+file_to_open=args.file
 
 #Open the file
 try:
-    with open(fileToOpen) as roadmapJSONFile:
-        roadmapJSONData = json.load(roadmapJSONFile)
+    file_obj = open(file_to_open)
+    roadmapJSONData = json.load(file_obj)
 except:
-    print("Error parsing " + args.file + " as a JSON file")
+    raise
     exit()
 
-#Parse out the required fields
-roadmapTitle = roadmapJSONData["Title"]
-roadmapYears = roadmapJSONData["Years"]
-roadmapMeasure = roadmapJSONData["Measure"]
+j2r = JSON2roadmap(1,roadmapJSONData)
+svg_out = j2r.get_roadmap()
 
-#Validate options
-if int(roadmapYears) > 3 and roadmapMeasure == "Q" :
-    print("ERROR: Can't have quarter resolution beyond 3 years")
-    exit(1)
+destname = "jsontest-gradient-3YQ.svg"
+if os.path.exists(destname):
+    os.remove(destname)
 
-if int(roadmapYears) > 5:
-    print("ERROR: Can't have more then 5 years in a drawing")
-    exit(1)
-
-#Track Count
-trackPattern = re.compile('[Tt][Rr][Aa][Cc][Kk][0-9][0-9]?')
-tracksFound = []
-for key in roadmapJSONData:
-    isKeyTrack = trackPattern.match(key)
-    if isKeyTrack:
-        if args.debug:
-            print("DEBUG: " + key + " is found")
-        tracksFound.append(key)
-
-totalTrackCount = len(tracksFound)
-tracksFound.sort()
-
-if args.debug:
-    print("DEBUG: Number of tracks found - " + str(totalTrackCount))
-
-#Calculate the canvas size needed
-
-#Start building the SVG
+file_out_obj = open(destname,"x")
+file_out_obj.write(svg_out)
+file_out_obj.close()
