@@ -70,40 +70,72 @@ class JSON2roadmap:
             raise
 
         #Set the optional fields
-        if "titleBGColor" in self.json_dictionary:
-            self.title_bg_color = self.json_dictionary["titleBGColor"]
-        else:
-            self.title_bg_color = "#FFFFFF"
-
-        if "titleTextColor" in self.json_dictionary:
-            self.title_text_color = self.json_dictionary["titleTextColor"]
-        else:
-            self.title_text_color = "#000000"
-
-        if "gradientFill" in self.json_dictionary:
-            if self.json_dictionary["gradientFill"].lower() == "true":
-                self.gradient_fill = True
-        else:
-            self.gradient_fill = False
-
-        if "footer_text" in self.json_dictionary:
-            self.footer_text = self.json_dictionary["footerText"]
-        else:
-            self.footer_text = None
-
-        if "startYear" in self.json_dictionary:
-            self.start_year = self.json_dictionary["startYear"]
-        else:
-            today = datetime.today()
-            self.start_year = today.year
-
         try:
-            #Validate options
+            if "titleBGColor" in self.json_dictionary:
+                self.title_bg_color = self.json_dictionary["titleBGColor"]
+            else:
+                self.title_bg_color = "#FFFFFF"
+
+            if "titleTextColor" in self.json_dictionary:
+                self.title_text_color = self.json_dictionary["titleTextColor"]
+            else:
+                self.title_text_color = "#000000"
+
+            if "gradientFill" in self.json_dictionary:
+                if self.json_dictionary["gradientFill"].lower() == "true":
+                    self.gradient_fill = True
+            else:
+                self.gradient_fill = False
+
+            if "footer_text" in self.json_dictionary:
+                self.footer_text = self.json_dictionary["footerText"]
+            else:
+                self.footer_text = None
+
+            if "startYear" in self.json_dictionary:
+                self.start_year = self.json_dictionary["startYear"]
+            else:
+                today = datetime.today()
+                self.start_year = today.year
+        except:
+            raise
+
+        #Validate options
+        try:
             if int(self.roadmap_years) > 3 and roadmap_measure == "Q" :
                 raise ValueError ("ERROR: Can't have quarter resolution beyond 3 years")
-
             if int(self.roadmap_years) > 5:
                 raise ValueError ("ERROR: Can't have more then 5 years in a drawing")
+        except:
+            raise
 
+        #Check the milestone definitions for the required things
+        try:
+            for one_milestone_def in self.json_dictionary["milestones"]:
+                if not "color" in self.json_dictionary["milestones"][one_milestone_def]:
+                    raise ValueError("Missing color property in milestone " + one_milestone_def)
+                if not "letter" in self.json_dictionary["milestones"][one_milestone_def]:
+                    raise ValueError("Missing letter property in milestone " + one_milestone_def)
+        except:
+            raise
+
+        #Check each track for required things
+        try:
+            for one_track in self.json_dictionary["tracks"]:
+                if not "beginYear" in self.json_dictionary["tracks"][one_track]:
+                    raise ValueError("Missing beginYear property in track " + one_track)
+                if not "beginDivision" in self.json_dictionary["tracks"][one_track]:
+                    raise ValueError("Missing beginDivision property in track " + one_track)
+                if not "endYear" in self.json_dictionary["tracks"][one_track]:
+                    raise ValueError("Missing endYear property in track " + one_track)
+                if not "endDivision" in self.json_dictionary["tracks"][one_track]:
+                    raise ValueError("Missing endDivision property in track " + one_track)
+                
+                if "milestones" in self.json_dictionary["tracks"][one_track]:
+                    for one_track_milestone in self.json_dictionary["tracks"][one_track]["milestones"]:
+                        if not "year" in self.json_dictionary["tracks"][one_track]["milestones"][one_track_milestone]:
+                            raise ValueError("Missing year property in track " + one_track + " for milestone " + one_track_milestone)
+                        if not "division" in self.json_dictionary["tracks"][one_track]["milestones"][one_track_milestone]:
+                            raise ValueError("Missing division property in track " + one_track + " for milestone " + one_track_milestone)
         except:
             raise
