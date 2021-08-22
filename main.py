@@ -1,57 +1,57 @@
 import json
-import re
 import argparse
 import os.path
+from datetime import datetime
+from roadmap import JSON2roadmap
 
 parser = argparse.ArgumentParser(description="Build SVG roadmap image from JSON")
-parser.add_argument("-f","--file",required=True,help="Path to file to parse")
+parser.add_argument("-i","--infile",required=True,help="Path to the JSON file to parse")
+parser.add_argument("-o","--outfile",required=True,help="Name and path of the SVG file to create")
+parser.add_argument("-f","--forceoverwrite",help="Overwrite the output file if it exists already",action="store_true")
 parser.add_argument("-d","--debug",help="Debug mode",action="store_true")
 args = parser.parse_args()
 
 #Check file path
-if os.path.exists(args.file):
-    if args.debug:
-        print("DEBUG: File " + args.file + " exists")
-    fileToOpen=args.file
+file_to_open=args.infile
+
+try:
+    if os.path.exists(file_to_open):
+        if args.debug:
+            print("DEBUG: File " + file_to_open + " exists")
+    else:
+        raise("File " + file_to_open + " does not exist")
+except:
+    raise
+    exit(1)
 
 #Open the file
 try:
-    with open(fileToOpen) as roadmapJSONFile:
-        roadmapJSONData = json.load(roadmapJSONFile)
+    file_obj = open(file_to_open)
+    roadmapJSONData = json.load(file_obj)
 except:
-    print("Error parsing " + args.file + " as a JSON file")
+    raise
     exit()
 
-#Parse out the required fields
-roadmapTitle = roadmapJSONData["Title"]
-roadmapYears = roadmapJSONData["Years"]
-roadmapMeasure = roadmapJSONData["Measure"]
+#Create the roadmap and get the SVG
+try:
+    j2r = JSON2roadmap(1,roadmapJSONData)
+    svg_out = j2r.get_roadmap()
+except:
+    raise
 
-#Validate options
-if int(roadmapYears) > 3 and roadmapMeasure == "Q" :
-    print("ERROR: Can't have quarter resolution beyond 3 years")
-    exit(1)
+try:
+    destname = args.outfile
+    if os.path.exists(destname):
+        if args.forceoverwrite:
+            os.remove(destname)
+        else:
+            raise("Destination file already exists")
+except:
+    raise("Error creating the file " + destname)
 
-if int(roadmapYears) > 5:
-    print("ERROR: Can't have more then 5 years in a drawing")
-    exit(1)
-
-#Track Count
-trackPattern = re.compile('[Tt][Rr][Aa][Cc][Kk][0-9][0-9]?')
-tracksFound = []
-for key in roadmapJSONData:
-    isKeyTrack = trackPattern.match(key)
-    if isKeyTrack:
-        if args.debug:
-            print("DEBUG: " + key + " is found")
-        tracksFound.append(key)
-
-totalTrackCount = len(tracksFound)
-tracksFound.sort()
-
-if args.debug:
-    print("DEBUG: Number of tracks found - " + str(totalTrackCount))
-
-#Calculate the canvas size needed
-
-#Start building the SVG
+try:
+    file_out_obj = open(destname,"x")
+    file_out_obj.write(svg_out)
+    file_out_obj.close()
+except:
+    raise ("Error creating the new file" + destname)
