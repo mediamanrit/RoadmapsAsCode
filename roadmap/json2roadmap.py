@@ -27,7 +27,11 @@ class JSON2roadmap:
             beginDivision = self.json_dictionary["tracks"][one_track]["beginDivision"]
             endYear = int(self.json_dictionary["tracks"][one_track]["endYear"])
             endDivision = self.json_dictionary["tracks"][one_track]["endDivision"]
-            r.add_track(one_track,beginYear,beginDivision,endYear,endDivision)
+            if "bgcolor" in self.json_dictionary["tracks"][one_track]:
+                bgcolor = self.json_dictionary["tracks"][one_track]["bgcolor"]
+                r.add_track(one_track,beginYear,beginDivision,endYear,endDivision,track_bgcolor=bgcolor)
+            else:
+                r.add_track(one_track,beginYear,beginDivision,endYear,endDivision)
 
             if "milestones" in self.json_dictionary["tracks"][one_track]:
                 for one_track_milestone in self.json_dictionary["tracks"][one_track]["milestones"]:

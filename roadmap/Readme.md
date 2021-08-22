@@ -13,6 +13,10 @@ Some of the words used in the documentation and code and what they mean:
 * **Technology Architect**: The person who made this tool due to a large lack of capability and understanding in my industry.
 ---
 
+## JSON File Format
+If you use the JSON2roadmap class to create roadmaps, the format and examples for the JSON file can be found at this link.
+---
+
 ## JSON2roadmap class
 This class takes in a python dictionary that is produced using the json module (reading) a json file, and uses the Roadmap class to generate a roadmap visualization.  In other words, it's a wrapper for the Roadmap class that leverages JSON formatted inputs to create a roadmap visualization.
 
@@ -50,13 +54,18 @@ Sets the options for the title bar. Requires:
  * bg_color (str): The background color for the title box in hex format.
  * text_color (str): The text color for the title box in hex format.
 
-**set_track_options**(*self*, *gradient_fill:bool=None*)
+**set_track_options**(*self*, *gradient_fill:bool=None*, *track_height:int=None*)
 Set the track options.  All options are optional:
  * gradient_fill (bool): Set to True if the tracks should be filled with gradient colors between the milestones.
+ * track_height (int): How tall to make each track.  Default is 40.
 
 **set_footer_text**(*self*,*footer_text:str*)
 Sets the text for the footer.  Requires:
  * footer_text (str): The text that will appear in the footer of the image.
+
+**set_roadmap_options**(*self*, *roadmap_bg_color:str=None*)
+ Sets options for the roadmap.  All options are optional:
+ * roadmap_bg_color (str): What hex color the background will be.  Defaults to transparent.
 
 **add_milestone_definition**(*self*, *milestone_name:str*, *milestone_bgcolor:str*, *milestone_letter:str*)
 Adds a milestone definition for the roadmap.  Milestones on each track will use these parameters when they get placed on each track as needed.

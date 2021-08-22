@@ -53,6 +53,8 @@ class Roadmap:
 
         self.trackopt_gradient = False
         self.trackopt_height = 40
+        self.roadmap_bg_color = None
+
 
         #Define the arror end positions
         self.endpoints = {}
@@ -213,7 +215,6 @@ class Roadmap:
             if not colormatch.match(text_color):
                 raise ValueError ("Invalid text_color provided")
         except:
-            print("Please set valid colors!")
             raise
 
         #Set the variables
@@ -223,11 +224,25 @@ class Roadmap:
         #Rebuild the title box
         self.__build_title_box()
     
-    def set_track_options(self, gradient_fill:bool=None):
+    def set_track_options(self, gradient_fill:bool=None, track_height:int=None):
         """Set options for all tracks"""
         try:
             if gradient_fill is not None:
                 self.trackopt_gradient = gradient_fill
+            if track_height is not None:
+                self.trackopt_height = track_height
+        except:
+            raise
+
+    def set_roadmap_options(self, roadmap_bg_color:str=None):
+        """Set options for the roadmap"""
+        try:
+            if roadmap_bg_color is not None:
+                colormatch = re.compile("^#(?:[0-9a-fA-F]{3}){1,2}$")
+                if not colormatch.match(roadmap_bg_color):
+                    raise ValueError ("Invalid roadmap_bg_color provided")
+                else:
+                    self.roadmap_bg_color = roadmap_bg_color
         except:
             raise
 
@@ -466,7 +481,6 @@ class Roadmap:
                         if not "milestone_column" in self.tracks[onetrack]["milestones"][onemilestone]:
                             continue
                         mcolumn = self.tracks[onetrack]["milestones"][onemilestone]["milestone_column"]
-                        #mbg = self.milestones[onemilestone]["bgcolor"]
                         milestone_order[mcolumn] = onemilestone
 
                         currentkey = 0
@@ -561,9 +575,12 @@ class Roadmap:
                     if len(milestone_order) == 0:
                         this_start_x = self.tracks[onetrack]["start_x"]
 
-                        sanitized_track_name = onetrack.replace(" ","_")
-                        target_fill_url = "url(#fill_" + sanitized_track_name + ")"
-                        box = self.__create_one_arrow_box(int(this_start_x),int(self.tracks[onetrack]["y"]),target_fill_url,track_fontcolor)
+                        if "track_bgcolor" in self.tracks[onetrack]:
+                            fillcolor = self.tracks[onetrack]["track_bgcolor"]
+                        else:
+                            fillcolor = "#FFFFFF"
+                        
+                        box = self.__create_one_arrow_box(int(this_start_x),int(self.tracks[onetrack]["y"]),fillcolor,track_fontcolor)
                         svg_tracks = svg_tracks + box
 
                         #Add the text
@@ -712,7 +729,10 @@ class Roadmap:
 
         svg_opening = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         svg_opening = svg_opening + "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">"
-        svg_opening = svg_opening + "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"1200px\" height=\"" + str(last_y) + "px\">"
+        svg_opening = svg_opening + "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"1200px\" height=\"" + str(last_y) + "px\""
+        if self.roadmap_bg_color is not None:
+            svg_opening = svg_opening + " style=\"background-color:" + self.roadmap_bg_color + "\" "
+        svg_opening = svg_opening + ">"
         return svg_opening
 
     def __build_year_boxes(self,num_years):

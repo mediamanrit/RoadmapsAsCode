@@ -8,6 +8,7 @@
     "years" : "3",
     "startYear" : "2020",
     "measure" : "Q",
+    "bgcolor" : "#111111",
     "milestones" : {
         "Emerging" : {
             "color" : "#0000FF",
@@ -32,7 +33,6 @@
     },
     "tracks" : {
         "JSON Test Track 1" : {
-            "trackName" : "JSON Test Track 1",
             "beginYear" : "2010",
             "beginDivision" : "Q2",
             "endYear" : "2021",
@@ -57,7 +57,6 @@
             }
         },
         "JSON Test Track 2" : {
-            "trackName" : "JSON Test Track 2",
             "beginYear" : "2021",
             "beginDivision" : "Q1",
             "endYear" : "2029",
@@ -70,7 +69,6 @@
             }
         },
         "JSON Test Track 3" : {
-            "trackName" : "JSON Test Track 3",
             "beginYear" : "2020",
             "beginDivision" : "Q1",
             "endYear" : "2022",
@@ -95,11 +93,11 @@
             }
         },
         "JSON Test Track 4" : {
-            "trackName" : "JSON Test Track 4",
             "beginYear" : "2010",
             "beginDivision" : "Q2",
             "endYear" : "2029",
             "endDivision" : "Q3",
+            "bgcolor" : "#000084",
             "milestones" : {
                 "Standard" : {
                     "year": "2010",
@@ -112,7 +110,6 @@
             }
         },
         "JSON Test Track 5" : {
-            "trackName" : "JSON Test Track 5",
             "beginYear" : "2011",
             "beginDivision" : "Q2",
             "endYear" : "2029",
@@ -141,7 +138,6 @@
             }
         },
         "JSON Test Track 6" : {
-            "trackName" : "JSON Test Track 6",
             "beginYear" : "2020",
             "beginDivision" : "Q1",
             "endYear" : "2022",
@@ -154,7 +150,6 @@
             }
         },
         "JSON Test Track 7" : {
-            "trackName" : "JSON Test Track 7",
             "beginYear" : "2020",
             "beginDivision" : "Q3",
             "endYear" : "2022",
