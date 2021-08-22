@@ -11,10 +11,12 @@ Some of the words used in the documentation and code and what they mean:
 * **Track**: A line on a roadmap, defined by starting and ending points.
 * **Milestone**: A point on a track that indicates a state change.  Typically milestone meanings on all tracks share a common set of state defintions.
 * **Technology Architect**: The person who made this tool due to a large lack of capability and understanding in my industry.
+
 ---
 
 ## JSON File Format
-If you use the JSON2roadmap class to create roadmaps, the format and examples for the JSON file can be found at this link.
+If you use the JSON2roadmap class to create roadmaps, the format and examples for the JSON file can be found at [this link](https://github.com/mediamanrit/RoadmapsAsCode/blob/main/docs/JSONReadme.md) .
+
 ---
 
 ## JSON2roadmap class

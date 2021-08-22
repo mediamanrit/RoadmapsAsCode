@@ -15,9 +15,17 @@ Key features of the tool:
 * Modular code, so you can use it how you see fit (embedded in a website, command line based, etc)
 * SVG output of all graphics, consumable virtually anywhere
 
+My end goal is to create a tool that can be consumed in real time displaying current state or past states of architecture roadmaps and plans.
+
 ---
 ## Usage
-To use the class, see the Readme file in the roadmap folder.
+To use the class, see the [Readme file](https://github.com/mediamanrit/RoadmapsAsCode/blob/main/roadmap/Readme.md) in the roadmap folder.
+
+---
+## Sample
+This sample was generated using the JSON2roadmap class
+
+![Sample roadmap](https://raw.githubusercontent.com/mediamanrit/RoadmapsAsCode/main/docs/sample.svg)
 
 ---
 ## Example
