@@ -23,9 +23,7 @@ To use the class, see the [Readme file](https://github.com/mediamanrit/RoadmapsA
 
 ---
 ## Sample
-This sample was generated using the JSON2roadmap class
+This sample was generated using the JSON2roadmap class:
 
 ![Sample roadmap](https://raw.githubusercontent.com/mediamanrit/RoadmapsAsCode/main/docs/sample.svg)
 
----
-## Example
